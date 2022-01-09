@@ -1,0 +1,35 @@
+name: microparser
+version: 0.0.1
+synopsis: Lambda calculus interpreter
+description: See README at <https://github.com/japiirainen/microparser#readme>
+maintainer: Joona Piirainen <joona.piirainen@gmail.com>
+github: japiirainen/microparser
+category: Development
+extra-source-files:
+  - CHANGELOG.md
+
+ghc-options: -Wall
+
+dependencies:
+  - base
+  - text
+
+library:
+  source-dirs: src
+  exposed-modules:
+    - MicroParser
+
+executable:
+  main: Main.hs
+  source-dirs: app
+  dependencies:
+    - microparser
+
+tests:
+  tasty:
+    main: Main.hs
+    source-dirs: tasty
+
+    dependencies:
+      - base
+      - microparser

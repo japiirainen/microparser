@@ -1,0 +1,65 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.34.5.
+--
+-- see: https://github.com/sol/hpack
+
+name:           microparser
+version:        0.0.1
+synopsis:       Lambda calculus interpreter
+description:    See README at <https://github.com/japiirainen/microparser#readme>
+category:       Development
+homepage:       https://github.com/japiirainen/microparser#readme
+bug-reports:    https://github.com/japiirainen/microparser/issues
+maintainer:     Joona Piirainen <joona.piirainen@gmail.com>
+build-type:     Simple
+extra-source-files:
+    CHANGELOG.md
+
+source-repository head
+  type: git
+  location: https://github.com/japiirainen/microparser
+
+library
+  exposed-modules:
+      MicroParser
+  other-modules:
+      Paths_microparser
+  hs-source-dirs:
+      src
+  ghc-options: -Wall
+  build-depends:
+      base
+    , text
+  default-language: Haskell2010
+
+executable microparser
+  main-is: Main.hs
+  other-modules:
+      Paths_microparser
+  hs-source-dirs:
+      app
+  ghc-options: -Wall
+  build-depends:
+      base
+    , microparser
+    , text
+  default-language: Haskell2010
+
+test-suite tasty
+  type: exitcode-stdio-1.0
+  main-is: Main.hs
+  other-modules:
+      Check
+      Lex
+      Parse
+      Util
+      Paths_microparser
+  hs-source-dirs:
+      tasty
+  ghc-options: -Wall
+  build-depends:
+      base
+    , microparser
+    , text
+  default-language: Haskell2010
