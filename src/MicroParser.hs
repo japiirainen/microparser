@@ -2,10 +2,12 @@
 
 module MicroParser where
 
-import Control.Applicative (Alternative (..))
+import Control.Applicative (Alternative (..), optional)
 import Control.Monad (void)
 import qualified Data.Char as Char
+import Data.Functor (($>))
 import Data.List (intercalate)
+import Data.Maybe (fromMaybe)
 
 data ParseResult a
   = ParseSuccess !a !Int String
@@ -65,17 +67,34 @@ string (x : xs) = char x *> string xs
 many1 :: Parser a -> Parser [a]
 many1 p = (:) <$> p <*> many p
 
-sepBy :: Parser a -> Parser b -> Parser [a]
-sepBy p sep = (:) <$> p <*> many (sep *> p)
-
 alpha :: Parser Char
 alpha = satisfy "alpha" Char.isAlpha
+
+sepBy1 :: Parser a -> Parser b -> Parser [a]
+sepBy1 p sep = (:) <$> p <*> many (sep *> p)
+
+sepBy :: Parser a -> Parser b -> Parser [a]
+sepBy parser separator = sepBy1 parser separator <|> pure []
+
+digit :: Parser Char
+digit = satisfy "digit" Char.isDigit
+
+decimal :: (Integral a, Read a) => Parser a
+decimal = read <$> many1 digit
+
+signedDecimal :: Parser Int
+signedDecimal = fromMaybe id <$> optional (char '-' $> negate) <*> decimal
+
+spaces :: Parser ()
+spaces = void $ many (satisfy "whitespace" Char.isSpace)
 
 newline :: Parser ()
 newline = char '\n' <|> (char '\r' *> char '\n')
 
-spaces :: Parser ()
-spaces = void $ many (satisfy "whitespace" Char.isSpace)
+horizontalSpaces :: Parser ()
+horizontalSpaces = void . many $
+  satisfy "horizontal whitespace" $ \c ->
+    Char.isSpace c && c /= '\n' && c /= '\r'
 
 runParser :: Parser a -> String -> Either String a
 runParser (Parser p) ts = case p 0 ts of
@@ -99,3 +118,15 @@ pKv :: Parser KV
 pKv = KV <$> parseKv
   where
     parseKv = (,) <$> many alpha <* char ':' <* spaces <*> many alpha
+
+-- Part 2 examples
+pKvs :: Parser [KV]
+pKvs = pKv `sepBy` char ','
+
+pKvsNewLine :: Parser [KV]
+pKvsNewLine = pKv `sepBy` newline
+
+pKvsHorizontal :: Parser [KV]
+pKvsHorizontal = pKv `sepBy` s
+  where
+    s = horizontalSpaces *> char ',' <* horizontalSpaces
